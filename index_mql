@@ -1,0 +1,853 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BI Antonio Fogaca</title>
+<style>
+:root {
+    --bg: #0a0908;
+    --bg2: #14110f;
+    --card: #1d1916;
+    --border: #2c2620;
+    --text: #e8e6e1;
+    --muted: #8a8278;
+    --accent: #c9a961;
+    --accent2: #e0c98a;
+    --green: #22c55e;
+    --green-bg: rgba(34,197,94,0.12);
+    --yellow: #eab308;
+    --yellow-bg: rgba(234,179,8,0.12);
+    --red: #ef4444;
+    --red-bg: rgba(239,68,68,0.12);
+    --blue: #3b82f6;
+    --blue-bg: rgba(59,130,246,0.12);
+    --gold-bg: rgba(201,169,97,0.10);
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body { background:var(--bg); color:var(--text); font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; font-size:14px; overflow:hidden; height:100vh; }
+
+.app { display:flex; height:100vh; }
+
+.sidebar {
+    width:230px; min-width:230px; background:var(--bg2); border-right:1px solid var(--border);
+    display:flex; flex-direction:column; padding:20px 0; overflow-y:auto;
+}
+.sidebar-logo { padding:0 20px 20px; border-bottom:1px solid var(--border); margin-bottom:12px; }
+.sidebar-logo h1 { font-size:17px; font-weight:700; letter-spacing:.5px; }
+.sidebar-logo h1 span { color:var(--accent); }
+.sidebar-logo .sub { font-size:11px; color:var(--muted); margin-top:2px; letter-spacing:.3px; }
+
+.nav-section-title { padding:14px 20px 6px; font-size:10px; text-transform:uppercase; letter-spacing:1px; color:var(--muted); font-weight:600; }
+
+.nav-item {
+    display:flex; align-items:center; gap:10px; padding:9px 20px; cursor:pointer;
+    color:var(--muted); font-size:13px; font-weight:500; transition:all .15s; border-left:3px solid transparent;
+    user-select:none;
+}
+.nav-item:hover { color:var(--text); background:var(--gold-bg); }
+.nav-item.active { color:var(--accent2); background:var(--gold-bg); border-left-color:var(--accent); }
+.nav-item .icon { font-size:14px; width:18px; text-align:center; }
+.nav-sub { padding-left:30px; font-size:12px; }
+.nav-sub.active { color:var(--accent2); }
+
+.main { flex:1; display:flex; flex-direction:column; overflow:hidden; }
+
+.header {
+    display:flex; align-items:center; justify-content:space-between; padding:12px 24px;
+    background:var(--bg2); border-bottom:1px solid var(--border); flex-shrink:0; gap:12px;
+}
+.header-left { display:flex; align-items:center; gap:12px; flex-wrap:wrap; }
+.header-left input[type="date"] {
+    background:var(--card); border:1px solid var(--border); border-radius:8px;
+    color:var(--text); padding:5px 10px; font-size:12px;
+}
+.header-left input[type="date"]::-webkit-calendar-picker-indicator { filter:invert(1); }
+.header-right { display:flex; align-items:center; gap:8px; }
+.hbtn {
+    padding:5px 12px; border-radius:14px; border:1px solid var(--border);
+    background:transparent; color:var(--muted); font-size:11px; cursor:pointer; transition:all .15s;
+}
+.hbtn:hover { border-color:var(--accent); color:var(--text); }
+.hbtn.active { background:var(--accent); border-color:var(--accent); color:#000; font-weight:600; }
+.sync-info { font-size:11px; color:var(--muted); }
+
+.content { flex:1; overflow-y:auto; padding:24px; }
+
+.section-title {
+    font-size:18px; font-weight:700; margin-bottom:16px; display:flex; align-items:center; gap:10px;
+    padding-bottom:12px; border-bottom:1px solid var(--border);
+}
+.section-title .badge { font-size:10px; padding:3px 10px; border-radius:12px; background:var(--gold-bg); color:var(--accent); text-transform:uppercase; letter-spacing:.5px; font-weight:600; }
+
+.kpi-grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(170px, 1fr)); gap:12px; margin-bottom:24px; }
+.kpi {
+    background:var(--card); border:1px solid var(--border); border-radius:12px;
+    padding:16px;
+}
+.kpi .label { font-size:10px; text-transform:uppercase; color:var(--muted); letter-spacing:.6px; margin-bottom:6px; display:flex; align-items:center; gap:6px; }
+.kpi .value { font-size:22px; font-weight:700; line-height:1.2; }
+.kpi .value.gold { color:var(--accent2); }
+.kpi .sub { font-size:11px; color:var(--muted); margin-top:4px; }
+
+.panel {
+    background:var(--card); border:1px solid var(--border); border-radius:12px;
+    padding:20px; margin-bottom:16px;
+}
+.panel-title { font-size:14px; font-weight:600; margin-bottom:14px; color:var(--accent2); display:flex; align-items:center; gap:8px; }
+
+table { width:100%; border-collapse:collapse; font-size:12px; }
+th {
+    text-align:left; padding:8px 10px; color:var(--muted); font-size:10px; text-transform:uppercase;
+    letter-spacing:.5px; border-bottom:1px solid var(--border); white-space:nowrap; font-weight:600;
+}
+td { padding:8px 10px; border-bottom:1px solid rgba(44,38,32,0.5); vertical-align:middle; white-space:nowrap; }
+tr:hover { background:var(--gold-bg); }
+.num { text-align:right; font-variant-numeric:tabular-nums; }
+.nome-cell { max-width:340px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.complement { color:var(--muted); font-size:11px; }
+.status-active { color:var(--green); font-weight:600; }
+.status-paused { color:var(--yellow); }
+.status-archived { color:var(--muted); }
+
+.funil-vertical { display:flex; flex-direction:column; gap:8px; margin:16px 0; }
+.funil-row { display:flex; align-items:center; gap:14px; }
+.funil-row-info { width:160px; flex-shrink:0; }
+.funil-step-lbl { font-size:11px; color:var(--muted); text-transform:uppercase; letter-spacing:.5px; font-weight:600; }
+.funil-step-conv { font-size:10px; color:var(--accent); margin-top:2px; }
+.funil-step-conv.zero { color:var(--red); }
+.funil-bar-wrap { flex:1; display:flex; justify-content:center; align-items:center; height:38px; }
+.funil-bar-h {
+    background:linear-gradient(90deg, var(--accent), var(--accent2));
+    height:100%; border-radius:8px;
+    display:flex; align-items:center; justify-content:center;
+    color:#000; font-weight:700; font-size:13px;
+    transition:width .4s ease; min-width:30px;
+    box-shadow: 0 2px 8px rgba(201,169,97,0.2);
+}
+.funil-bar-h .vlbl { padding:0 12px; white-space:nowrap; }
+
+.empty { padding:40px 20px; text-align:center; color:var(--muted); font-size:13px; }
+
+.chip {
+    display:inline-block; padding:2px 8px; border-radius:10px; font-size:10px; font-weight:600;
+    background:var(--gold-bg); color:var(--accent2); margin-right:4px;
+}
+.chip.vendas { background:var(--green-bg); color:var(--green); }
+.chip.leads { background:var(--blue-bg); color:var(--blue); }
+
+/* Modal Criativo */
+.modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.75); z-index:9999; display:none; justify-content:center; align-items:center; backdrop-filter:blur(4px); }
+.modal-overlay.show { display:flex; }
+.modal-box { background:var(--card); border:1px solid var(--border); border-radius:16px; width:560px; max-width:92vw; max-height:90vh; overflow-y:auto; padding:24px; position:relative; animation:modalIn .2s ease; }
+@keyframes modalIn { from { opacity:0; transform:scale(0.95); } to { opacity:1; transform:scale(1); } }
+.modal-close { position:absolute; top:12px; right:16px; background:none; border:none; color:var(--muted); font-size:22px; cursor:pointer; }
+.modal-close:hover { color:var(--text); }
+.modal-header { display:flex; gap:16px; align-items:flex-start; margin-bottom:20px; }
+.modal-thumb { width:96px; height:96px; border-radius:10px; object-fit:cover; background:var(--bg2); flex-shrink:0; }
+.modal-info { flex:1; min-width:0; }
+.modal-title { font-size:15px; font-weight:700; margin-bottom:8px; word-break:break-word; }
+.modal-tags { display:flex; gap:6px; flex-wrap:wrap; align-items:center; }
+.modal-tag { padding:3px 10px; border-radius:12px; font-size:10px; font-weight:600; text-transform:uppercase; letter-spacing:.3px; }
+.modal-tag.video { background:var(--blue-bg); color:var(--blue); }
+.modal-tag.image { background:rgba(168,85,247,0.15); color:#c084fc; }
+.modal-tag.ativo { background:var(--green-bg); color:var(--green); }
+.modal-tag.pausado { background:var(--yellow-bg); color:var(--yellow); }
+.modal-ig-btn { display:inline-flex; align-items:center; gap:5px; padding:4px 12px; border-radius:14px; background:linear-gradient(45deg,#f09433,#e6683c,#dc2743,#cc2366,#bc1888); color:#fff; font-size:10px; font-weight:600; text-decoration:none; text-transform:uppercase; letter-spacing:.3px; }
+.modal-ig-btn:hover { opacity:.85; }
+.modal-kpis { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-bottom:20px; }
+.modal-kpi { background:var(--bg2); border-radius:10px; padding:12px; text-align:center; }
+.modal-kpi-label { font-size:10px; color:var(--muted); text-transform:uppercase; letter-spacing:.5px; margin-bottom:4px; }
+.modal-kpi-value { font-size:18px; font-weight:700; color:var(--accent2); }
+.modal-section-title { font-size:11px; font-weight:600; color:var(--muted); text-transform:uppercase; letter-spacing:.6px; margin-bottom:12px; }
+.retention-row { display:flex; align-items:center; gap:10px; margin-bottom:8px; }
+.retention-label { width:40px; font-size:12px; color:var(--muted); text-align:right; }
+.retention-bar-bg { flex:1; height:14px; background:var(--bg); border-radius:7px; overflow:hidden; }
+.retention-bar { height:100%; border-radius:7px; background:var(--blue); min-width:2px; transition:width .3s; }
+.retention-value { width:110px; font-size:11px; color:var(--text); }
+.row-clickable { cursor:pointer; }
+.row-clickable:hover { background:var(--gold-bg); }
+
+.status-filter-bar { display:flex; gap:6px; align-items:center; margin-bottom:14px; flex-wrap:wrap; }
+.status-filter-label { font-size:11px; color:var(--muted); text-transform:uppercase; letter-spacing:.5px; }
+.status-filter-count { font-size:11px; color:var(--muted); margin-left:8px; }
+</style>
+</head>
+<body>
+
+<div class="app">
+
+<nav class="sidebar">
+    <div class="sidebar-logo">
+        <h1><span>BI</span> Fogaça</h1>
+        <div class="sub">Antônio Fogaça</div>
+    </div>
+
+    <div class="nav-item active" data-section="resumo">
+        <span class="icon">📊</span> Resumo Geral
+    </div>
+
+    <div class="nav-section-title">Vendas</div>
+    <div class="nav-item" data-section="vendas-all"><span class="icon">💰</span> Todas Vendas</div>
+    <div class="nav-item nav-sub" data-section="vendas-edn"><span class="icon">▸</span> Encontro de Negócios</div>
+    <div class="nav-item nav-sub" data-section="vendas-sales"><span class="icon">▸</span> Sales Academy</div>
+
+    <div class="nav-section-title">Leads</div>
+    <div class="nav-item" data-section="leads-all"><span class="icon">🎯</span> Todos Leads</div>
+    <div class="nav-item nav-sub" data-section="leads-edn"><span class="icon">▸</span> Encontro de Negócios</div>
+    <div class="nav-item nav-sub" data-section="leads-mesa"><span class="icon">▸</span> A Mesa</div>
+    <div class="nav-item nav-sub" data-section="leads-casal"><span class="icon">▸</span> Casal de Negócios</div>
+    <div class="nav-item nav-sub" data-section="leads-gcr"><span class="icon">▸</span> GCR</div>
+    <div class="nav-item nav-sub" data-section="leads-diag"><span class="icon">▸</span> Diagnóstico</div>
+    <div class="nav-item nav-sub" data-section="leads-china"><span class="icon">▸</span> Missão China</div>
+    <div class="nav-item nav-sub" data-section="leads-protocolo"><span class="icon">▸</span> Protocolo</div>
+
+    <div class="nav-section-title">Análise</div>
+    <div class="nav-item" data-section="criativos"><span class="icon">🎨</span> Criativos</div>
+    <div class="nav-item" data-section="passos"><span class="icon">💡</span> Próximos Passos</div>
+</nav>
+
+<div class="main">
+
+<header class="header">
+    <div class="header-left">
+        <input type="date" id="date-start" value="2026-01-01">
+        <span style="color:var(--muted);font-size:12px">a</span>
+        <input type="date" id="date-end">
+        <div style="display:flex;gap:4px;margin-left:8px;flex-wrap:wrap;">
+            <button class="hbtn range-btn" data-range="hoje">Hoje</button>
+            <button class="hbtn range-btn" data-range="ontem">Ontem</button>
+            <button class="hbtn range-btn" data-range="3d">3d</button>
+            <button class="hbtn range-btn" data-range="7d">7d</button>
+            <button class="hbtn range-btn" data-range="14d">14d</button>
+            <button class="hbtn range-btn" data-range="30d">30d</button>
+            <button class="hbtn range-btn active" data-range="all">Todo o período</button>
+        </div>
+    </div>
+    <div class="header-right">
+        <span class="sync-info">Atualizado --/-- --:--</span>
+        <button class="hbtn" onclick="location.reload()">↻</button>
+    </div>
+</header>
+
+<div class="content" id="main-content"></div>
+
+</div></div>
+
+<!-- Modal Criativo -->
+<div class="modal-overlay" id="modal-criativo" onclick="if(event.target===this)fecharModal()">
+    <div class="modal-box">
+        <button class="modal-close" onclick="fecharModal()">×</button>
+        <div class="modal-header">
+            <img class="modal-thumb" id="modal-thumb" src="" alt="">
+            <div class="modal-info">
+                <div class="modal-title" id="modal-title"></div>
+                <div class="modal-tags" id="modal-tags"></div>
+            </div>
+        </div>
+        <div class="modal-kpis" id="modal-kpis"></div>
+        <div id="modal-retention"></div>
+    </div>
+</div>
+
+<script>
+// === DADOS INJETADOS PELO atualizar_bi.py ===
+// IMPORTANTE: manter os marcadores /*END_X*/ intactos - o Python substitui o conteudo entre eles.
+var DAILY_DATA = []; /*END_DAILY_DATA*/
+var CAMPAIGNS_META = []; /*END_CAMPAIGNS_META*/
+var CAMPAIGNS_DAILY = []; /*END_CAMPAIGNS_DAILY*/
+var ADS_META = []; /*END_ADS_META*/
+var ADS_DAILY = []; /*END_ADS_DAILY*/
+var ADS_VIDEO_TOTALS = {}; /*END_ADS_VIDEO_TOTALS*/
+var MQL_DAILY = []; /*END_MQL_DAILY*/
+
+// Estado UI
+var STATUS_FILTER = 'active';
+
+// === HELPERS ===
+function fmtBRL(v) { return 'R$ ' + (v||0).toLocaleString('pt-BR', {minimumFractionDigits:2, maximumFractionDigits:2}); }
+function fmtNum(v) { return (v||0).toLocaleString('pt-BR'); }
+function fmtNumShort(v) { v=v||0; if(v>=1000000)return (v/1000000).toFixed(1)+'M'; if(v>=1000)return (v/1000).toFixed(1)+'K'; return v.toString(); }
+function fmtPct(v) { return (v||0).toFixed(2) + '%'; }
+function safeDiv(a, b) { return b > 0 ? a/b : 0; }
+
+function statusLabel(s) {
+    if (s === 'ACTIVE') return '<span class="status-active">Ativa</span>';
+    if (s === 'PAUSED') return '<span class="status-paused">Pausada</span>';
+    if (s === 'CAMPAIGN_PAUSED') return '<span class="status-paused">Campanha pausada</span>';
+    if (s === 'ADSET_PAUSED') return '<span class="status-paused">Adset pausado</span>';
+    if (s === 'ARCHIVED' || s === 'DELETED') return '<span class="status-archived">Arquivada</span>';
+    return '<span class="complement">' + s + '</span>';
+}
+function isActive(s) { return s === 'ACTIVE'; }
+function isPaused(s) { return s && s.indexOf('PAUSED') >= 0; }
+
+function getDateRange() {
+    return { since: document.getElementById('date-start').value, until: document.getElementById('date-end').value };
+}
+function inRange(date, range) { return date >= range.since && date <= range.until; }
+function filterDaily(rows) {
+    var r = getDateRange();
+    return rows.filter(d => inRange(d.date, r));
+}
+function aggDaily(rows) {
+    var s = {spend:0,impressions:0,clicks:0,reach:0,link_clicks:0,lp_views:0,leads:0,purchases:0};
+    rows.forEach(d => {
+        s.spend+=d.spend; s.impressions+=d.impressions; s.clicks+=d.clicks; s.reach+=d.reach;
+        s.link_clicks+=d.link_clicks; s.lp_views+=d.lp_views; s.leads+=d.leads; s.purchases+=d.purchases;
+    });
+    s.ctr = safeDiv(s.clicks, s.impressions) * 100;
+    s.cpc = safeDiv(s.spend, s.clicks);
+    s.cpm = safeDiv(s.spend, s.impressions) * 1000;
+    s.cpl = safeDiv(s.spend, s.leads);
+    s.cpa = safeDiv(s.spend, s.purchases);
+    return s;
+}
+
+function mqlByDate() {
+    var m = {};
+    MQL_DAILY.forEach(d => { m[d.date] = (m[d.date] || 0) + (d.mqls || 0); });
+    return m;
+}
+function sumMqlsInRange() {
+    var r = getDateRange();
+    return MQL_DAILY.reduce(function(acc, d) {
+        return inRange(d.date, r) ? acc + (d.mqls || 0) : acc;
+    }, 0);
+}
+function fmtDateBR(iso) {
+    if (!iso || iso.length < 10) return iso || '';
+    return iso.slice(8,10) + '/' + iso.slice(5,7) + '/' + iso.slice(0,4);
+}
+
+// === AGREGADORES (FILTRADOS POR DATA) ===
+// CAMPAIGNS_DAILY = [cid, date, spend, imp, clicks, lpv, leads, purchases]
+function aggregateCampaigns() {
+    var range = getDateRange();
+    var byId = {};
+    CAMPAIGNS_DAILY.forEach(row => {
+        var cid = row[0], date = row[1];
+        if (!inRange(date, range)) return;
+        if (!byId[cid]) byId[cid] = {spend:0,impressions:0,clicks:0,lpv:0,leads:0,purchases:0,result_count:0};
+        byId[cid].spend += row[2];
+        byId[cid].impressions += row[3];
+        byId[cid].clicks += row[4];
+        byId[cid].lpv += row[5];
+        byId[cid].leads += row[6];
+        byId[cid].purchases += row[7];
+        byId[cid].result_count += (row[8] || 0); // resultado especifico
+    });
+    var result = [];
+    CAMPAIGNS_META.forEach(c => {
+        var agg = byId[c.id];
+        if (!agg || agg.spend === 0) return;
+        result.push(Object.assign({}, c, agg, {
+            ctr: safeDiv(agg.clicks, agg.impressions) * 100,
+            cpc: safeDiv(agg.spend, agg.clicks),
+            cpm: safeDiv(agg.spend, agg.impressions) * 1000,
+            cpl: agg.leads > 0 ? agg.spend / agg.leads : 0,
+            cpa: agg.purchases > 0 ? agg.spend / agg.purchases : 0,
+            cpr: agg.result_count > 0 ? agg.spend / agg.result_count : 0
+        }));
+    });
+    return result;
+}
+
+// ADS_DAILY = [aid, date, spend, imp, clicks, lpv, leads, purchases, vv]
+function aggregateAds() {
+    var range = getDateRange();
+    var byId = {};
+    ADS_DAILY.forEach(row => {
+        var aid = row[0], date = row[1];
+        if (!inRange(date, range)) return;
+        if (!byId[aid]) byId[aid] = {spend:0,impressions:0,clicks:0,lpv:0,leads:0,purchases:0,vv:0};
+        byId[aid].spend += row[2];
+        byId[aid].impressions += row[3];
+        byId[aid].clicks += row[4];
+        byId[aid].lpv += row[5];
+        byId[aid].leads += row[6];
+        byId[aid].purchases += row[7];
+        byId[aid].vv += row[8];
+    });
+    var result = [];
+    var campMap = {};
+    CAMPAIGNS_META.forEach(c => { campMap[c.id] = c; });
+    ADS_META.forEach(a => {
+        var agg = byId[a.id];
+        if (!agg || agg.spend === 0) return;
+        var vid = ADS_VIDEO_TOTALS[a.id] || {};
+        var camp = campMap[a.campaign_id] || {};
+        result.push(Object.assign({}, a, agg, {
+            ctr: safeDiv(agg.clicks, agg.impressions) * 100,
+            cpc: safeDiv(agg.spend, agg.clicks),
+            hook_rate: safeDiv(agg.vv, agg.impressions) * 100,
+            is_video: agg.vv > 0,
+            p25: vid.p25 || 0, p50: vid.p50 || 0, p75: vid.p75 || 0, p100: vid.p100 || 0,
+            bloco: camp.bloco || 'Outros',
+            produto: camp.produto || 'Outros'
+        }));
+    });
+    return result;
+}
+
+// === FILTRO STATUS + ORDENACAO ===
+function applyStatusFilter(items) {
+    var filtered;
+    if (STATUS_FILTER === 'active') filtered = items.filter(x => isActive(x.status));
+    else if (STATUS_FILTER === 'paused') filtered = items.filter(x => isPaused(x.status));
+    else filtered = items.slice();
+    filtered.sort((a, b) => {
+        var aa = isActive(a.status) ? 0 : 1;
+        var bb = isActive(b.status) ? 0 : 1;
+        if (aa !== bb) return aa - bb;
+        return b.spend - a.spend;
+    });
+    return filtered;
+}
+
+function filterByBloco(camps, filter) {
+    if (filter === 'all') return camps;
+    if (filter === 'vendas') return camps.filter(c => c.bloco === 'Vendas');
+    if (filter === 'leads') return camps.filter(c => c.bloco === 'Leads');
+    // filtro composto: {produto, bloco}
+    if (typeof filter === 'object' && filter) {
+        return camps.filter(c =>
+            (!filter.produto || c.produto === filter.produto) &&
+            (!filter.bloco || c.bloco === filter.bloco)
+        );
+    }
+    return camps.filter(c => c.produto === filter);
+}
+
+function isPurchaseResult(c) {
+    return c.result_action_type && c.result_action_type.indexOf('purchase') >= 0;
+}
+
+function aggSum(items) {
+    var s = {spend:0,impressions:0,clicks:0,lpv:0,lp_views:0,leads:0,purchases:0,reach:0,link_clicks:0,result_count:0};
+    items.forEach(c => {
+        s.spend+=c.spend; s.impressions+=c.impressions; s.clicks+=c.clicks;
+        s.lpv+=(c.lpv||0); s.lp_views+=(c.lpv||0);
+        s.leads+=c.leads; s.purchases+=c.purchases;
+        if (!isPurchaseResult(c)) s.result_count += (c.result_count || 0);
+    });
+    s.ctr = safeDiv(s.clicks, s.impressions) * 100;
+    s.cpc = safeDiv(s.spend, s.clicks);
+    s.cpm = safeDiv(s.spend, s.impressions) * 1000;
+    s.cpl = safeDiv(s.spend, s.leads);
+    s.cpa = safeDiv(s.spend, s.purchases);
+    s.cpr = safeDiv(s.spend, s.result_count);
+    return s;
+}
+
+// === RENDERS ===
+function renderStatusFilter(count, total) {
+    var html = '<div class="status-filter-bar">';
+    html += '<span class="status-filter-label">Status:</span>';
+    var opts = [['active','✓ Ativas'],['paused','⏸ Pausadas'],['all','Todas']];
+    opts.forEach(o => {
+        var active = STATUS_FILTER === o[0] ? 'active' : '';
+        html += '<button class="hbtn ' + active + '" onclick="setStatusFilter(\'' + o[0] + '\')">' + o[1] + '</button>';
+    });
+    if (count !== undefined) {
+        html += '<span class="status-filter-count">' + count;
+        if (total !== undefined && total !== count) html += ' de ' + total;
+        html += ' campanhas</span>';
+    }
+    html += '</div>';
+    return html;
+}
+
+function setStatusFilter(s) {
+    STATUS_FILTER = s;
+    var active = document.querySelector('.nav-item.active');
+    if (active) showSection(active.dataset.section);
+}
+
+function renderKPIs(agg, opts) {
+    opts = opts || {};
+    var primary = opts.primary || 'both';
+    var html = '<div class="kpi-grid">';
+    html += '<div class="kpi"><div class="label">💰 Investimento</div><div class="value gold">' + fmtBRL(agg.spend) + '</div><div class="sub">' + (opts.dias ? opts.dias + ' dias' : '') + '</div></div>';
+    html += '<div class="kpi"><div class="label">👁️ Impressões</div><div class="value">' + fmtNumShort(agg.impressions) + '</div><div class="sub">CPM ' + fmtBRL(agg.cpm) + '</div></div>';
+    html += '<div class="kpi"><div class="label">🖱️ Cliques</div><div class="value">' + fmtNumShort(agg.clicks) + '</div><div class="sub">CTR ' + fmtPct(agg.ctr) + ' · CPC ' + fmtBRL(agg.cpc) + '</div></div>';
+    html += '<div class="kpi"><div class="label">📄 LP Views</div><div class="value">' + fmtNumShort(agg.lp_views || agg.lpv || 0) + '</div><div class="sub">' + fmtPct(safeDiv(agg.lp_views || agg.lpv || 0, agg.clicks) * 100) + ' dos cliques</div></div>';
+    // Resultado (leads, custom convs, conversas, etc - tudo que NAO for compra)
+    var resultCount = agg.result_count || 0;
+    if (resultCount > 0 || primary === 'leads' || primary === 'both') {
+        html += '<div class="kpi"><div class="label">🎯 Resultado</div><div class="value gold">' + fmtNum(resultCount) + '</div><div class="sub">CPR ' + (resultCount > 0 ? fmtBRL(agg.cpr) : '—') + '</div></div>';
+    }
+    // Vendas (sempre)
+    html += '<div class="kpi"><div class="label">🛒 Vendas</div><div class="value gold">' + fmtNum(agg.purchases) + '</div><div class="sub">CPA ' + (agg.purchases > 0 ? fmtBRL(agg.cpa) : '—') + '</div></div>';
+    // MQLs (da planilha) - so aparece no resumo geral (primary=both)
+    if (opts.showMqls) {
+        var mqlTotal = sumMqlsInRange();
+        var leadsRef = agg.result_count || agg.leads || 0;
+        var conv = leadsRef > 0 ? (mqlTotal / leadsRef * 100) : 0;
+        html += '<div class="kpi"><div class="label">🧲 MQLs</div><div class="value gold">' + fmtNum(mqlTotal) + '</div><div class="sub">' + (leadsRef > 0 ? fmtPct(conv) + ' dos leads' : '—') + '</div></div>';
+    }
+    html += '</div>';
+    return html;
+}
+
+function renderCampTable(camps, opts) {
+    opts = opts || {};
+    var primary = opts.primary || 'both';
+    if (camps.length === 0) {
+        return '<div class="empty">Nenhuma campanha no filtro/período selecionado.</div>';
+    }
+    var html = '<div class="panel"><div class="panel-title">📋 Campanhas</div>';
+    html += '<div style="overflow-x:auto"><table>';
+    html += '<thead><tr>';
+    html += '<th>Campanha</th><th>Produto</th><th>Status</th>';
+    html += '<th>Resultado</th><th class="num">Qtd</th><th class="num">Custo/Result.</th>';
+    html += '<th class="num">Invest.</th><th class="num">Impr.</th><th class="num">Cliques</th><th class="num">CTR</th>';
+    html += '<th class="num">LP Views</th>';
+    html += '<th class="num">Vendas</th><th class="num">CPA</th>';
+    html += '</tr></thead><tbody>';
+    camps.forEach(c => {
+        var isPurch = isPurchaseResult(c);
+        html += '<tr>';
+        html += '<td class="nome-cell" title="' + c.nome + '">' + c.nome + '</td>';
+        html += '<td><span class="chip ' + (c.bloco === 'Vendas' ? 'vendas' : 'leads') + '">' + c.produto + '</span></td>';
+        html += '<td>' + statusLabel(c.status) + '</td>';
+        // Resultado: vazio quando otimizacao for purchase (vai em Vendas)
+        html += '<td class="complement" style="font-size:11px;">' + (isPurch ? '—' : (c.result_label || '—')) + '</td>';
+        html += '<td class="num">' + (isPurch ? '—' : fmtNum(c.result_count || 0)) + '</td>';
+        html += '<td class="num">' + (!isPurch && c.result_count > 0 ? fmtBRL(c.cpr) : '—') + '</td>';
+        html += '<td class="num">' + fmtBRL(c.spend) + '</td>';
+        html += '<td class="num">' + fmtNumShort(c.impressions) + '</td>';
+        html += '<td class="num">' + fmtNum(c.clicks) + '</td>';
+        html += '<td class="num">' + fmtPct(c.ctr) + '</td>';
+        html += '<td class="num">' + fmtNum(c.lpv) + '</td>';
+        html += '<td class="num">' + fmtNum(c.purchases) + '</td>';
+        html += '<td class="num">' + (c.purchases > 0 ? fmtBRL(c.cpa) : '—') + '</td>';
+        html += '</tr>';
+    });
+    html += '</tbody></table></div></div>';
+    return html;
+}
+
+function renderDailyTable(rows) {
+    if (!rows || rows.length === 0) return '';
+    var mqlMap = mqlByDate();
+    var sorted = rows.slice().sort(function(a, b) { return b.date.localeCompare(a.date); });
+    var html = '<div class="panel"><div class="panel-title">📅 Acompanhamento diário</div>';
+    html += '<div style="overflow-x:auto"><table>';
+    html += '<thead><tr><th>Data</th><th class="num">Invest.</th><th class="num">Leads</th><th class="num">MQLs</th><th class="num">% MQL/Lead</th><th class="num">Vendas</th></tr></thead><tbody>';
+    sorted.forEach(function(d) {
+        var mql = mqlMap[d.date] || 0;
+        var conv = d.leads > 0 ? (mql / d.leads * 100) : 0;
+        html += '<tr>';
+        html += '<td>' + fmtDateBR(d.date) + '</td>';
+        html += '<td class="num">' + fmtBRL(d.spend) + '</td>';
+        html += '<td class="num">' + fmtNum(d.leads) + '</td>';
+        html += '<td class="num">' + fmtNum(mql) + '</td>';
+        html += '<td class="num">' + (d.leads > 0 ? fmtPct(conv) : '—') + '</td>';
+        html += '<td class="num">' + fmtNum(d.purchases) + '</td>';
+        html += '</tr>';
+    });
+    html += '</tbody></table></div></div>';
+    return html;
+}
+
+function renderFunil(agg, primary) {
+    var steps;
+    var resultLbl = 'Resultado';
+    var resultVal = agg.result_count || 0;
+    if (primary === 'leads')
+        steps = [
+            {lbl:'Impressões', val:agg.impressions},
+            {lbl:'Cliques', val:agg.clicks},
+            {lbl:'LP Views', val:agg.lp_views||agg.lpv},
+            {lbl:resultLbl, val:resultVal || agg.leads}
+        ];
+    else if (primary === 'vendas')
+        steps = [
+            {lbl:'Impressões', val:agg.impressions},
+            {lbl:'Cliques', val:agg.clicks},
+            {lbl:'LP Views', val:agg.lp_views||agg.lpv},
+            {lbl:'Vendas', val:agg.purchases}
+        ];
+    else
+        steps = [
+            {lbl:'Impressões', val:agg.impressions},
+            {lbl:'Cliques', val:agg.clicks},
+            {lbl:'LP Views', val:agg.lp_views||agg.lpv},
+            {lbl:resultLbl, val:resultVal || agg.leads},
+            {lbl:'Vendas', val:agg.purchases}
+        ];
+
+    var topVal = steps[0].val || 1;
+    var html = '<div class="panel"><div class="panel-title">🔻 Funil</div><div class="funil-vertical">';
+    steps.forEach(function(s, i) {
+        // Escala suavizada (potencia 0.4) pra ficar harmonico mesmo com valores muito disparates.
+        var ratio = s.val / topVal;
+        var widthPct = Math.max(Math.pow(ratio, 0.4) * 100, 18);
+        var convHtml = '';
+        if (i > 0) {
+            var prev = steps[i-1].val;
+            if (prev > 0) {
+                var rate = (s.val / prev) * 100;
+                var cls = rate < 1 ? 'zero' : '';
+                convHtml = '<div class="funil-step-conv ' + cls + '">↓ ' + rate.toFixed(rate < 10 ? 2 : 1) + '% do anterior</div>';
+            }
+        }
+        html += '<div class="funil-row">';
+        html += '<div class="funil-row-info">';
+        html += '<div class="funil-step-lbl">' + s.lbl + '</div>';
+        html += convHtml;
+        html += '</div>';
+        html += '<div class="funil-bar-wrap">';
+        html += '<div class="funil-bar-h" style="width:' + widthPct + '%"><span class="vlbl">' + fmtNumShort(s.val) + '</span></div>';
+        html += '</div>';
+        html += '</div>';
+    });
+    html += '</div></div>';
+    return html;
+}
+
+// === SECTIONS ===
+function sectionResumo() {
+    var rows = filterDaily(DAILY_DATA);
+    var agg = aggDaily(rows);
+    var allCamps = aggregateCampaigns();
+    var camps = applyStatusFilter(allCamps);
+    var aggCampSum = aggSum(allCamps);
+    agg.result_count = aggCampSum.result_count;
+    agg.cpr = safeDiv(agg.spend, agg.result_count);
+
+    var html = '<div class="section-title">📊 Resumo Geral <span class="badge">' + rows.length + ' dias</span></div>';
+    html += renderKPIs(agg, {primary:'both', dias:rows.length, showMqls:true});
+    html += renderFunil(agg, 'both');
+    html += renderDailyTable(rows);
+
+    html += '<div class="panel"><div class="panel-title">🔀 Distribuição por Bloco</div>';
+    var blocos = {};
+    allCamps.forEach(c => {
+        if (!blocos[c.bloco]) blocos[c.bloco] = {spend:0,leads:0,purchases:0,n:0};
+        blocos[c.bloco].spend += c.spend;
+        blocos[c.bloco].leads += c.leads;
+        blocos[c.bloco].purchases += c.purchases;
+        blocos[c.bloco].n += 1;
+    });
+    html += '<table><thead><tr><th>Bloco</th><th class="num">Campanhas</th><th class="num">Investimento</th><th class="num">Leads</th><th class="num">Vendas</th></tr></thead><tbody>';
+    Object.keys(blocos).forEach(b => {
+        var x = blocos[b];
+        var cls = b === 'Vendas' ? 'vendas' : (b === 'Leads' ? 'leads' : '');
+        html += '<tr><td><span class="chip ' + cls + '">' + b + '</span></td><td class="num">' + x.n + '</td><td class="num">' + fmtBRL(x.spend) + '</td><td class="num">' + fmtNum(x.leads) + '</td><td class="num">' + fmtNum(x.purchases) + '</td></tr>';
+    });
+    html += '</tbody></table></div>';
+
+    html += renderStatusFilter(camps.length, allCamps.length);
+    html += renderCampTable(camps, {primary:'both'});
+    return html;
+}
+
+function sectionBloco(filter, titulo, primary) {
+    var allCamps = aggregateCampaigns();
+    var camps = filterByBloco(allCamps, filter);
+    var campsFiltered = applyStatusFilter(camps);
+    var aggAll = aggSum(camps);
+
+    var html = '<div class="section-title">' + titulo + ' <span class="badge">' + camps.length + ' camp.</span></div>';
+    if (camps.length === 0) {
+        html += '<div class="empty">Nenhuma campanha encontrada para esse filtro no período.</div>';
+        return html;
+    }
+    html += renderKPIs(aggAll, {primary:primary});
+    html += renderFunil(aggAll, primary);
+    html += renderStatusFilter(campsFiltered.length, camps.length);
+    html += renderCampTable(campsFiltered, {primary:primary});
+    return html;
+}
+
+function sectionCriativos() {
+    var allAds = aggregateAds();
+    var ads = applyStatusFilter(allAds);
+
+    var html = '<div class="section-title">🎨 Criativos <span class="badge">' + allAds.length + ' no período</span></div>';
+    if (allAds.length === 0) {
+        html += '<div class="empty">Nenhum criativo no período selecionado.</div>';
+        return html;
+    }
+    html += '<div class="status-filter-bar"><span class="status-filter-label">Status:</span>';
+    var opts = [['active','✓ Ativos'],['paused','⏸ Pausados'],['all','Todos']];
+    opts.forEach(o => {
+        var active = STATUS_FILTER === o[0] ? 'active' : '';
+        html += '<button class="hbtn ' + active + '" onclick="setStatusFilter(\'' + o[0] + '\')">' + o[1] + '</button>';
+    });
+    html += '<span class="status-filter-count">' + ads.length + ' de ' + allAds.length + ' criativos</span></div>';
+
+    html += '<div class="panel"><div class="panel-title">Top criativos por gasto</div><div style="overflow-x:auto"><table>';
+    html += '<thead><tr><th>Anúncio</th><th>Campanha</th><th>Produto</th><th>Status</th><th>Tipo</th><th class="num">Invest.</th><th class="num">CTR</th><th class="num">CPC</th><th class="num">Hook</th><th class="num">Leads</th><th class="num">Vendas</th></tr></thead><tbody>';
+    var topAds = ads.slice(0, 50);
+    window._adsCache = topAds;
+    topAds.forEach((a, idx) => {
+        html += '<tr class="row-clickable" onclick="abrirModalCriativo(' + idx + ')">';
+        html += '<td class="nome-cell" title="' + a.nome + '"><span style="color:var(--accent2);border-bottom:1px dotted var(--accent);">' + a.nome + '</span></td>';
+        html += '<td class="nome-cell complement" title="' + a.campanha + '">' + a.campanha + '</td>';
+        html += '<td><span class="chip ' + (a.bloco === 'Vendas' ? 'vendas' : 'leads') + '">' + a.produto + '</span></td>';
+        html += '<td>' + statusLabel(a.status) + '</td>';
+        html += '<td>' + (a.is_video ? '🎬' : '🖼️') + '</td>';
+        html += '<td class="num">' + fmtBRL(a.spend) + '</td>';
+        html += '<td class="num">' + fmtPct(a.ctr) + '</td>';
+        html += '<td class="num">' + fmtBRL(a.cpc) + '</td>';
+        html += '<td class="num">' + (a.is_video ? fmtPct(a.hook_rate) : '—') + '</td>';
+        html += '<td class="num">' + fmtNum(a.leads) + '</td>';
+        html += '<td class="num">' + fmtNum(a.purchases) + '</td>';
+        html += '</tr>';
+    });
+    html += '</tbody></table></div></div>';
+    return html;
+}
+
+function abrirModalCriativo(idx) {
+    var ads = window._adsCache || [];
+    var a = ads[idx];
+    if (!a) return;
+
+    document.getElementById('modal-thumb').src = a.thumb || '';
+    document.getElementById('modal-title').textContent = a.nome;
+
+    var tagsHtml = '';
+    tagsHtml += '<span class="modal-tag ' + (a.is_video ? 'video' : 'image') + '">' + (a.is_video ? 'Vídeo' : 'Imagem') + '</span>';
+    tagsHtml += '<span class="modal-tag ' + (isActive(a.status) ? 'ativo' : 'pausado') + '">' + (isActive(a.status) ? 'Ativo' : 'Pausado') + '</span>';
+    if (a.ig_url) {
+        tagsHtml += '<a href="' + a.ig_url + '" target="_blank" class="modal-ig-btn">Instagram ↗</a>';
+    }
+    document.getElementById('modal-tags').innerHTML = tagsHtml;
+
+    var kpis = [
+        { l: 'Gasto', v: fmtBRL(a.spend) },
+        { l: 'Leads', v: fmtNum(a.leads) },
+        { l: 'CPL', v: a.leads > 0 ? fmtBRL(a.spend / a.leads) : '—' },
+        { l: 'Vendas', v: fmtNum(a.purchases) },
+        { l: 'CPA', v: a.purchases > 0 ? fmtBRL(a.spend / a.purchases) : '—' },
+        { l: 'CTR', v: fmtPct(a.ctr) },
+        { l: 'CPC', v: fmtBRL(a.cpc) },
+        { l: 'CPM', v: fmtBRL(safeDiv(a.spend, a.impressions) * 1000) },
+        { l: 'Impressões', v: fmtNum(a.impressions) }
+    ];
+    document.getElementById('modal-kpis').innerHTML = kpis.map(function(k) {
+        return '<div class="modal-kpi"><div class="modal-kpi-label">' + k.l + '</div><div class="modal-kpi-value">' + k.v + '</div></div>';
+    }).join('');
+
+    var retEl = document.getElementById('modal-retention');
+    if (a.is_video && a.vv > 0) {
+        var stages = [
+            { lbl: '25%', val: a.p25 },
+            { lbl: '50%', val: a.p50 },
+            { lbl: '75%', val: a.p75 },
+            { lbl: '100%', val: a.p100 }
+        ];
+        var base = a.vv || a.p25 || 1;
+        var html = '<div class="modal-section-title">Retenção de Vídeo</div>';
+        stages.forEach(function(s) {
+            var pct = Math.min(100, (s.val / base) * 100);
+            html += '<div class="retention-row">';
+            html += '<div class="retention-label">' + s.lbl + '</div>';
+            html += '<div class="retention-bar-bg"><div class="retention-bar" style="width:' + pct + '%"></div></div>';
+            html += '<div class="retention-value">' + fmtNum(s.val) + ' (' + pct.toFixed(0) + '%)</div>';
+            html += '</div>';
+        });
+        retEl.innerHTML = html;
+    } else {
+        retEl.innerHTML = '';
+    }
+
+    document.getElementById('modal-criativo').classList.add('show');
+}
+
+function fecharModal() {
+    document.getElementById('modal-criativo').classList.remove('show');
+}
+
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') fecharModal();
+});
+
+function sectionPassos() {
+    return '<div class="section-title">💡 Próximos Passos</div><div class="panel"><div class="panel-title">Em construção</div><div class="empty">Recomendações automáticas serão adicionadas na próxima etapa.</div></div>';
+}
+
+// === ROUTER ===
+var SECTIONS = {
+    'resumo': function() { return sectionResumo(); },
+    'vendas-all': function() { return sectionBloco('vendas', '💰 Vendas — Todas', 'vendas'); },
+    'vendas-edn': function() { return sectionBloco({produto:'Encontro de Negocios', bloco:'Vendas'}, '💰 Vendas — Encontro de Negócios', 'vendas'); },
+    'vendas-sales': function() { return sectionBloco('Sales Academy', '💰 Vendas — Sales Academy', 'vendas'); },
+    'leads-all': function() { return sectionBloco('leads', '🎯 Leads — Todos', 'leads'); },
+    'leads-edn': function() { return sectionBloco({produto:'Encontro de Negocios', bloco:'Leads'}, '🎯 Leads — Encontro de Negócios (Cadastro)', 'leads'); },
+    'leads-mesa': function() { return sectionBloco('A Mesa', '🎯 Leads — A Mesa', 'leads'); },
+    'leads-casal': function() { return sectionBloco('Casal de Negocios', '🎯 Leads — Casal de Negócios', 'leads'); },
+    'leads-gcr': function() { return sectionBloco('GCR', '🎯 Leads — GCR', 'leads'); },
+    'leads-diag': function() { return sectionBloco('Diagnostico', '🎯 Leads — Diagnóstico', 'leads'); },
+    'leads-china': function() { return sectionBloco('Missao China', '🎯 Leads — Missão China', 'leads'); },
+    'leads-protocolo': function() { return sectionBloco('Protocolo', '🎯 Leads — Protocolo', 'leads'); },
+    'criativos': function() { return sectionCriativos(); },
+    'passos': function() { return sectionPassos(); }
+};
+
+function showSection(key) {
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    var nav = document.querySelector('.nav-item[data-section="' + key + '"]');
+    if (nav) nav.classList.add('active');
+    var renderer = SECTIONS[key];
+    document.getElementById('main-content').innerHTML = renderer ? renderer() : '<div class="empty">Seção não encontrada.</div>';
+}
+
+function toYMD(d) {
+    return d.getFullYear() + '-' +
+           String(d.getMonth()+1).padStart(2,'0') + '-' +
+           String(d.getDate()).padStart(2,'0');
+}
+
+function init() {
+    var ontem = new Date(); ontem.setDate(ontem.getDate() - 1);
+    document.getElementById('date-end').value = toYMD(ontem);
+    if (DAILY_DATA.length > 0) document.getElementById('date-start').value = DAILY_DATA[0].date;
+
+    document.querySelectorAll('.nav-item').forEach(n => {
+        n.addEventListener('click', () => showSection(n.dataset.section));
+    });
+
+    document.querySelectorAll('.range-btn').forEach(b => {
+        b.addEventListener('click', () => {
+            document.querySelectorAll('.range-btn').forEach(x => x.classList.remove('active'));
+            b.classList.add('active');
+            var range = b.dataset.range;
+            var hj = new Date();
+            var on = new Date(); on.setDate(on.getDate() - 1);
+            var start, end;
+            if (range === 'hoje') { start = hj; end = hj; }
+            else if (range === 'ontem') { start = on; end = on; }
+            else if (range === 'all') {
+                start = DAILY_DATA.length > 0 ? new Date(DAILY_DATA[0].date + 'T00:00:00') : new Date('2026-01-01');
+                end = on;
+            } else {
+                var dias = parseInt(range.replace('d',''));
+                end = on; start = new Date(end); start.setDate(start.getDate() - dias + 1);
+            }
+            document.getElementById('date-start').value = toYMD(start);
+            document.getElementById('date-end').value = toYMD(end);
+            var active = document.querySelector('.nav-item.active');
+            if (active) showSection(active.dataset.section);
+        });
+    });
+
+    ['date-start','date-end'].forEach(id => {
+        document.getElementById(id).addEventListener('change', () => {
+            var active = document.querySelector('.nav-item.active');
+            if (active) showSection(active.dataset.section);
+        });
+    });
+
+    showSection('resumo');
+}
+
+document.addEventListener('DOMContentLoaded', init);
+</script>
+
+</body>
+</html>
